@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="com.moon.pf.dao.BoardAttachDao">
+
+	<insert id="insertAttachInfo" parameterType="Map">
+		INSERT INTO board_attach (
+			`type_seq`,
+			`board_seq`,
+			`filename`,
+			`fake_filename`,
+			`file_size`,
+			`file_type`,
+			`create_date`
+		) VALUES (
+			#{typeSeq},
+			#{boardSeq},
+			#{filename},
+			#{fakeFilename},
+			#{fileSize},
+			#{fileType},
+			NOW()
+		)
+	</insert>
+	
+	<select id="getAttachFileInfo" parameterType="int" resultType="Map">
+		SELECT *
+		  FROM board_attach
+		 WHERE file_idx = #{0};
+	</select>
+	
+	<delete id="deleteAttach" parameterType="int">
+		DELETE FROM board_attach
+		 WHERE file_idx = #{0}
+	</delete>
+	
+	<select id="getFile" parameterType="int" resultType="Map">
+		SELECT *
+		  FROM board_attach
+		 WHERE type_seq = #{0}
+		   AND board_seq = #{1}
+	</select>
+	
+	<delete id="deleteAttachBoard" parameterType="int">
+		DELETE
+		  FROM board_attach
+		 WHERE type_seq = #{0}
+		   AND board_seq = #{1}
+	</delete>
+	
+	<select id="getAttachAllFileInfo" resultType="Map">
+		SELECT *
+		  FROM board_attach
+	</select>
+	
+	<update id="updateUnlinked" parameterType="int">
+		UPDATE board_attach
+		   SET linked = 0
+		 WHERE file_idx = #{0}
+	</update>
+	
+		<update id="updateUnlinkeds" parameterType="java.util.ArrayList">
+		UPDATE board_attach
+		   SET linked = 0
+		 WHERE file_idx IN
+		 <!-- parameter type 이 collection 이면 collection type을, Map 이면 key 를 적어준다. -->
+		 <foreach collection="list" item="fileIdx" open="(" close=")" separator=",">
+		 			 #{fileIdx}
+		 </foreach>
+	</update>
+</mapper>

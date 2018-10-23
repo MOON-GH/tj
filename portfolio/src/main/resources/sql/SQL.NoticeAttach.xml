@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="com.moon.pf.dao.NoticeAttachDao">
+
+	<insert id="insertAttachInfo" parameterType="Map">
+		INSERT INTO board_attach (
+			`type_seq`,
+			`board_seq`,
+			`filename`,
+			`fake_filename`,
+			`file_size`,
+			`file_type`,
+			`save_loc`,
+			`create_date`
+		) VALUES (
+			#{typeSeq},
+			#{boardSeq},
+			#{filename},
+			#{fakeFilename},
+			#{fileSize},
+			#{fileType},
+			'empty',
+			NOW()
+		)
+	</insert>
+	
+	<select id="getAttachFileInfo" parameterType="int" resultType="Map">
+		SELECT *
+		  FROM board_attach
+		 WHERE file_idx = #{fileIdx};
+	</select>
+	
+	<delete id="deleteAttach" parameterType="int">
+		DELETE FROM board_attach
+		 WHERE file_idx = #{0}
+	</delete>
+	
+	<select id="getFile" parameterType="int" resultType="Map">
+		SELECT *
+		  FROM board_attach
+		 WHERE type_seq = #{0}
+		   AND board_seq = #{1}
+	</select>
+	
+	<delete id="deleteAttachBoard" parameterType="int">
+		DELETE
+		  FROM board_attach
+		 WHERE type_seq = #{0}
+		   AND board_seq = #{1}
+	</delete>
+</mapper>

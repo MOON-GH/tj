@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.moon.pf.dao.MemberDao">
+	
+	<select id="checkId" parameterType="String" resultType="int">
+		SELECT COUNT(member_idx)
+		  FROM member
+		 WHERE member_id = #{memberId} 
+	</select>
+	
+	<insert id="join" parameterType="Map">
+		INSERT INTO member (
+				`member_id`,
+				`member_pw`,
+				`member_name`,
+				`member_nick`,
+				`email`,
+				`birth_date`,
+				`create_date`,
+				`type_seq`
+		 )
+		 VALUES (
+		 		#{memberId},
+		 		SHA2(MD5(#{memberPw}), 512),
+		 		#{memberName},
+		 		#{memberNick},
+		 		#{email},
+		 		#{birthDate},
+		 		NOW(),
+		 		1
+		 )
+	</insert>
+	
+	<select id="findMemberId" parameterType="String" resultType="Member">
+		SELECT member_idx AS memberIdx,
+					 member_id AS memberId,
+					 member_pw AS memberPw,
+					 member_name AS memberName,
+					 member_nick AS memberNick,
+					 email,
+					 birth_date AS birthDate,
+					 create_date AS createDate,
+					 type_seq AS typeSeq
+		  FROM member 
+		 WHERE member_id = #{0}
+	</select>
+	
+	<select id="makeCipherText" parameterType="String" resultType="String">
+		SELECT SHA2(MD5(#{0}), 512)
+	</select>
+	
+	<select id="getMemberList" parameterType="Map" resultType="Map">
+		SELECT member_idx AS memberIdx,
+					 member_id AS memberId,
+					 member_nick AS memberNick,
+					 member_name AS memberName,
+					 email,
+					 DATE_FORMAT(create_date, '%Y-%m-%d') AS createDate,
+					 DATE_FORMAT(birth_date, '%Y-%m-%d') AS birthDate
+		  FROM member
+		 WHERE 1=1
+		<if test="searchType != null and searchType == 1">
+			AND (`member_id` LIKE CONCAT('%', #{searchText}, '%')
+			 OR `email` LIKE CONCAT('%', #{searchText}, '%'))
+		</if>
+		
+		<if test="searchType != null and searchType == 2">
+			AND (`member_id` LIKE CONCAT('%', #{searchText}, '%'))
+		</if>
+		
+		<if test="searchType != null and searchType == 3">
+			AND (`email` LIKE CONCAT('%', #{searchText}, '%'))
+		</if>
+		 ORDER BY ${sidx} ${sord} 
+	   LIMIT ${startIdx}, ${rows}
+	</select>
+	
+	<select id="getMemberListCnt" parameterType="Map" resultType="int">
+		SELECT COUNT(member_idx) 
+		  FROM member
+		 WHERE 1=1
+		<if test="searchType != null and searchType == 1">
+			 AND (`member_id` LIKE CONCAT('%', #{searchText}, '%')
+			 OR `email` LIKE CONCAT('%', #{searchText}, '%'))
+		</if>
+		
+		<if test="searchType != null and searchType == 2">
+			AND (`member_id` LIKE CONCAT('%', #{searchText}, '%'))
+		</if>
+		
+		<if test="searchType != null and searchType == 3">
+			AND (`email` LIKE CONCAT('%', #{searchText}, '%'))
+		</if>
+	</select>
+	
+	<delete id="deleteMember" parameterType="Map">
+		DELETE
+		  FROM member
+		 WHERE member_idx = #{memberIdx}
+	</delete>
+</mapper>

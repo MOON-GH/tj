@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.moon.pf.dao.NoticeDao">
+
+	<select id="getBoardCnt" parameterType="Map" resultType="int">
+		SELECT COUNT(board_seq)
+		  FROM board
+		 WHERE type_seq = #{typeSeq}
+	   <if test="searchType != null and searchType == 1">
+		 	AND (`title` LIKE CONCAT('%', #{searchText}, '%')
+		 	 OR `content` LIKE CONCAT('%', #{searchText}, '%'))
+		 </if>
+		 
+		 <if test="searchType != null and searchType == 2">
+		 	AND (`title` LIKE CONCAT('%', #{searchText}, '%'))
+		 </if>
+		 
+		 <if test="searchType != null and searchType == 3">
+		 	AND (`content` LIKE CONCAT('%', #{searchText}, '%'))
+		 </if>
+	</select>
+	
+	<select id="getBoardList" parameterType="Map" resultType="Map">
+		SELECT * 
+		  FROM board
+		 WHERE type_seq = #{typeSeq}
+		 
+		 <if test="searchType != null and searchType == 1">
+		 	AND (`title` LIKE CONCAT('%', #{searchText}, '%')
+		 	 OR `content` LIKE CONCAT('%', #{searchText}, '%'))
+		 </if>
+		 
+		 <if test="searchType != null and searchType == 2">
+		 	AND (`title` LIKE CONCAT('%', #{searchText}, '%'))
+		 </if>
+		 
+		 <if test="searchType != null and searchType == 3">
+		 	AND (`content` LIKE CONCAT('%', #{searchText}, '%'))
+		 </if>
+		 
+		 ORDER BY board_seq DESC
+		 LIMIT ${startIdx}, ${pageArticleSize}
+	</select>
+	
+	<update id="updateHits" parameterType="int">
+		UPDATE board
+		   SET hits = hits + 1
+		 WHERE type_seq = #{0}
+		   AND board_seq = #{1}
+	</update>	
+	
+	<select id="getBoard" parameterType="int" resultType="Map">
+		SELECT *
+		  FROM board
+		 WHERE type_seq = #{0}
+		   AND board_seq = #{1}
+	</select>
+	
+	<insert id="write" parameterType="Map" useGeneratedKeys="true" keyProperty="boardSeq">
+		INSERT INTO board (
+			`type_seq`,
+			`member_idx`,
+			`member_id`,
+			`member_nick`,
+			`title`,
+			`content`,
+			`has_file`,			
+			`create_date`
+		)
+		VALUES (
+			#{typeSeq},
+			#{memberIdx},
+			#{memberId},
+			#{memberNick},
+			#{title},
+			#{contents},
+			#{hasFile},
+			NOW()		 						
+		)
+	</insert>
+	
+	<update id="update" parameterType="Map">
+		UPDATE board
+		   SET title = #{title},
+		       content = #{contents}
+		 WHERE type_seq = #{typeSeq}
+		   AND board_seq = #{boardSeq}
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		DELETE FROM board
+		 WHERE type_seq = #{0}
+		   AND board_seq = #{1}
+	</delete>
+	
+	<update id="hasFileUpdate" parameterType="int">
+		UPDATE board
+		   SET has_file = 0
+		 WHERE type_seq = #{0}
+		   AND board_seq = #{1}
+	</update>
+</mapper>
